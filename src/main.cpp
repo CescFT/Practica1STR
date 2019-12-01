@@ -27,16 +27,22 @@ int iTime;
 int fTime;
 
 int sensor = 18;
-
+Timer t;
+InterruptIn interrupt;
+Serial serial1(USBTX, USBRX);
 int main() {
 
   // put your setup code here, to run once:
-
-
-  
+  interrupt.enable_irq();
+  t.start();
+  pid.SetMode(AUTOMATIC);
+  pid.SetOutputLimits(STOPPED, FULL_SPEED);
+  m.run(FORWARD);
+  m.setSpeed(Output);
 
   while(1) {
     // put your main code here, to run repeatedly:
+    
     
   }
 }
