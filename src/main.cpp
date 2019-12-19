@@ -17,8 +17,8 @@ double setPoint=0.0;
 double input=0.0;
 double output=0.0;
 //2 5
-double kp = 30; //40
-double ki = 9;
+double kp = 40; //40
+double ki = 10;
 double Kd = 0;
 
 
@@ -43,11 +43,11 @@ void askKeyboardSpeed()
 }
 
 void calculateVelocity(){
-  input = (steps*5/125)*100; //cm/s la speed
+  input = (steps*5/80)*PERIMETER; //31 cm/s vel max
   sprintf(inputStr, "input: %lf cm/s\n", input);
   serial1.printf(inputStr);
-  sprintf(velMotorStr, "Steps: %lf\n", steps);
-  serial1.printf(velMotorStr);
+  /*sprintf(velMotorStr, "Steps: %lf\n", steps);
+  serial1.printf(velMotorStr);*/
   steps=0;
   pid.Compute();
   m.setSpeed(output*100,0,0,0);
