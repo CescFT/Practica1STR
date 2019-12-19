@@ -17,31 +17,40 @@ double setPoint=0.0;
 double input=0.0;
 double output=0.0;
 //2 5
-double kp = 2;
-double ki = 5;
+double kp = 30; //40
+double ki = 9;
 double Kd = 0;
-PID pid(&input, &output, &setPoint, kp, ki, Kd, 0 ,DIRECT);
 
-int steps=0;
+
+double steps=0;
 char reached=0;
 int teclat = 0;
 int printControl=0;
-int timeElapsed;
-
-Timer t;
+double velocitatActual=0;
+char inputStr[100];
+char outputStr[100];
+char velMotorStr[100];
+PID pid(&input, &output, &setPoint, kp, ki, Kd, 1 ,DIRECT); //input -> velocitat actual (sensor)
 InterruptIn interrupt((PinName)PIN_SENSOR);
+Ticker iVelocity;
 Serial serial1(USBTX, USBRX);
 
 
-int askKeyboardSpeed()
+void askKeyboardSpeed()
 {
-  serial1.printf("Please, set a speed for the motor (0-100):");
-  int keyboardSpeed;
-  scanf("%d", &keyboardSpeed);
-  keyboardSpeed = (int) sqrt(keyboardSpeed*keyboardSpeed)%100;
+  serial1.printf("Introdueix velocitat a arribar:");
+  scanf("%lf", &setPoint);
+}
 
-  if(keyboardSpeed == 0) m.Direction(M_RELEASE);
-  return keyboardSpeed;
+void calculateVelocity(){
+  input = (steps*5/125)*100; //cm/s la speed
+  sprintf(inputStr, "input: %lf cm/s\n", input);
+  serial1.printf(inputStr);
+  sprintf(velMotorStr, "Steps: %lf\n", steps);
+  serial1.printf(velMotorStr);
+  steps=0;
+  pid.Compute();
+  m.setSpeed(output*100,0,0,0);
 }
 
 void count(){
@@ -50,44 +59,20 @@ void count(){
 
 int main() {
 
-  char outputStr[100];
-  char inputStr[100];
-  char velMotorStr[100];
-
   // put your setup code here, to run once:
   interrupt.enable_irq();
   interrupt.rise(&count);
-  pid.SetMode(AUTOMATIC);
+  askKeyboardSpeed();
+  //setPoint=100;
   m.Direction(M_FORWARD);
-  m.setSpeed(100.0, 100.0, 100.0, 100.0);
-
-  setPoint= 100;//askKeyboardSpeed();
-  t.start();
+  m.setSpeed(output,0,0,0);
+  
+  iVelocity.attach(&calculateVelocity, 0.2);
+  pid.SetMode(AUTOMATIC);
   while(1) {
     // put your main code here, to run repeatedly:
-    if(reached==1){
-        reached=0;
-        setPoint=askKeyboardSpeed();
-    }
-
-    if(steps >= 80){//Cada dos voltes perque el sensor no esta ben calibrat
-                    //una volta real son dos del sensor
-      t.stop();
-      timeElapsed = t.read();
-      input = (PERIMETER*(steps/80)/timeElapsed) *1000; //cm/s la speed
-      steps=0;
-      printControl++;
-      if(printControl == 5){
-        sprintf(outputStr, "PID: %lf \n", output);
-        serial1.printf(outputStr);
-        sprintf(inputStr, "Input: %lf cm/s\n", input);
-        serial1.printf(inputStr);
-        sprintf(velMotorStr, "Vel: %lf cm/s\n", setPoint);
-        serial1.printf(velMotorStr);
-        printControl=0;
-      }
-    }
-    pid.Compute();
+    
+    
     
   }
 }
