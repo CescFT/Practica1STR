@@ -18,7 +18,7 @@ double input=0.0;
 double output=0.0;
 //2 5
 double kp = 40; //40
-double ki = 10;
+double ki = 15;
 double Kd = 0;
 
 
