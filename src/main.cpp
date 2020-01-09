@@ -17,8 +17,8 @@ double setPoint=0.0;
 double input=0.0;
 double output=0.0;
 //2 5
-double kp = 40; //40
-double ki = 15;
+double kp = 0.15; //40
+double ki = 0.85;
 double Kd = 0;
 
 
@@ -36,18 +36,18 @@ Ticker iVelocity;
 Serial serial1(USBTX, USBRX);
 
 
-void askKeyboardSpeed()
-{
+void askKeyboardSpeed(){
   serial1.printf("Introdueix velocitat a arribar:");
   scanf("%lf", &setPoint);
 }
 
 void calculateVelocity(){
   input = (steps*5/80)*PERIMETER; //31 cm/s vel max
-  sprintf(inputStr, "input: %lf cm/s\n", input);
+  sprintf(inputStr, "Velocitat: %lf cm/s\t", input);
   serial1.printf(inputStr);
-  /*sprintf(velMotorStr, "Steps: %lf\n", steps);
-  serial1.printf(velMotorStr);*/
+  
+  sprintf(velMotorStr, "Output: %lf\n", output);
+  serial1.printf(velMotorStr);
   steps=0;
   pid.Compute();
   m.setSpeed(output*100,0,0,0);
@@ -69,10 +69,7 @@ int main() {
   
   iVelocity.attach(&calculateVelocity, 0.2);
   pid.SetMode(AUTOMATIC);
-  while(1) {
-    // put your main code here, to run repeatedly:
-    
-    
-    
+  while(1) {   
+    pid.Compute();
   }
 }
