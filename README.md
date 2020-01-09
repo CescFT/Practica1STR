@@ -1,4 +1,4 @@
-# NDS_Garlic_OS
+# Joystick Simulation for ST NUCLEO F767ZI
 
 ## Description
 
