@@ -12,10 +12,10 @@
 #define PERIMETER 20.7345 //2O.7345 cm
 #define PIN_SENSOR PG_0
 
-Motor m(0);
+Motor motor(0);
 double setPoint=0.0;
 double input=0.0;
-double output=0.0;
+double tunning=0.0;
 //2 5
 double kp = 0.15; //40
 double ki = 0.85;
@@ -23,16 +23,11 @@ double Kd = 0;
 
 
 double steps=0;
-char reached=0;
-int teclat = 0;
-int printControl=0;
-double velocitatActual=0;
 char inputStr[100];
-char outputStr[100];
-char velMotorStr[100];
-PID pid(&input, &output, &setPoint, kp, ki, Kd, 1 ,DIRECT); //input -> velocitat actual (sensor)
+char tunningString[100];
+PID pid(&input, &tunning, &setPoint, kp, ki, Kd, 1 ,DIRECT); //input -> velocitat actual (sensor)
 InterruptIn interrupt((PinName)PIN_SENSOR);
-Ticker iVelocity;
+Ticker interruptVel;
 Serial serial1(USBTX, USBRX);
 
 
@@ -46,11 +41,11 @@ void calculateVelocity(){
   sprintf(inputStr, "Velocitat: %lf cm/s\t", input);
   serial1.printf(inputStr);
   
-  sprintf(velMotorStr, "Output: %lf\n", output);
-  serial1.printf(velMotorStr);
+  sprintf(tunningString, "Output: %lf\n", tunning);
+  serial1.printf(tunningString);
   steps=0;
   pid.Compute();
-  m.setSpeed(output*100,0,0,0);
+  motor.setSpeed(tunning*100,0,0,0);
 }
 
 void count(){
@@ -64,10 +59,10 @@ int main() {
   interrupt.rise(&count);
   askKeyboardSpeed();
   //setPoint=100;
-  m.Direction(M_FORWARD);
-  m.setSpeed(output,0,0,0);
+  motor.Direction(M_FORWARD);
+  motor.setSpeed(tunning,0,0,0);
   
-  iVelocity.attach(&calculateVelocity, 0.2);
+  interruptVel.attach(&calculateVelocity, 0.2);
   pid.SetMode(AUTOMATIC);
   while(1) {   
     pid.Compute();
